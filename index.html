@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crecimiento de Vehículos Eléctricos — Bogotá</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<style>
+  :root{
+    --bg:#f4f7fb;
+    --panel:#ffffff;
+    --panel-alt:#eef3fa;
+    --panel-border:#dde6f0;
+    --text:#172231;
+    --text-muted:#5c6c80;
+    --accent:#2563c4;
+    --energy:#1fa97e;
+    --shadow: 0 16px 36px -20px rgba(23,34,49,0.28);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 460px at 92% -10%, #e4edfa 0%, transparent 60%),
+      radial-gradient(ellipse 800px 420px at 2% 100%, #e9f6f0 0%, transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.55;
+    padding:36px 20px 64px;
+  }
+  .wrap{ max-width:1120px; margin:0 auto; }
+
+  .hero{
+    display:grid; grid-template-columns:1.5fr 1fr; gap:28px; align-items:center;
+    background:var(--panel); border:1px solid var(--panel-border); border-radius:16px;
+    padding:30px 32px; box-shadow:var(--shadow); margin-bottom:22px; overflow:hidden;
+  }
+  @media (max-width:760px){ .hero{ grid-template-columns:1fr; } .hero-art{ order:-1; max-width:320px; margin:0 auto; } }
+  .hero h1{ font-family:'Archivo', sans-serif; font-weight:800; font-size:clamp(1.5rem, 3vw, 2.15rem); margin:0 0 10px; letter-spacing:-0.015em; }
+  .accent-bar{ width:120px; height:3px; border-radius:2px; margin:0 0 14px; background:linear-gradient(90deg, var(--accent), var(--energy)); }
+  .hero p{ color:var(--text-muted); margin:0; font-size:0.98rem; max-width:60ch; }
+  .hero-art{ position:relative; height:190px; border-radius:14px; overflow:hidden; }
+  .hero-art .hero-fallback{ position:absolute; inset:0; width:100%; height:100%; }
+  .hero-art img{ position:absolute; inset:0; width:100%; height:190px; object-fit:cover; border-radius:14px; display:block; }
+  .research-photo{ width:100%; height:160px; object-fit:cover; border-radius:10px; display:block; margin-top:12px; }
+
+  .panel{
+    position:relative; overflow:hidden;
+    background:var(--panel); border:1px solid var(--panel-border); border-radius:14px;
+    padding:22px 22px 20px; box-shadow:var(--shadow); margin-bottom:20px;
+  }
+  .panel:last-child{ margin-bottom:0; }
+  .panel::before{ content:""; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg, var(--accent), var(--energy)); opacity:0.9; }
+  .panel h2{ font-family:'Archivo', sans-serif; font-size:0.98rem; font-weight:600; margin:0 0 14px; display:flex; align-items:center; gap:9px; }
+  .panel h2 .dot{ width:8px; height:8px; border-radius:50%; background:var(--accent); flex:none; }
+  .panel h2 .dot.alt{ background:var(--energy); }
+
+  .obj-general{ color:var(--text); font-size:0.96rem; margin:0 0 14px; padding:12px 14px; background:var(--panel-alt); border-radius:8px; border-left:3px solid var(--accent); }
+  .obj-label{ font-family:'Archivo', sans-serif; font-weight:600; font-size:0.85rem; color:var(--text-muted); margin:0 0 8px; }
+  .obj-list{ margin:0; padding-left:0; list-style:none; counter-reset:obj; }
+  .obj-list li{ counter-increment:obj; position:relative; padding-left:32px; margin-bottom:10px; font-size:0.92rem; color:var(--text-muted); }
+  .obj-list li:last-child{ margin-bottom:0; }
+  .obj-list li::before{
+    content:counter(obj); position:absolute; left:0; top:0; width:22px; height:22px; border-radius:50%;
+    background:var(--accent); color:#fff; font-family:'IBM Plex Mono', monospace; font-size:0.75rem; font-weight:600;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  .layout{ display:grid; grid-template-columns:1.5fr 1fr; gap:20px; }
+  @media (max-width:800px){ .layout{ grid-template-columns:1fr; } }
+  .layout .panel{ margin-bottom:0; }
+
+  svg{ width:100%; height:auto; display:block; }
+  .axis-label{ fill:var(--text-muted); font-size:11px; }
+  .grid{ stroke:var(--panel-border); stroke-width:1; }
+  .curve-main{ fill:none; stroke:var(--accent); stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
+  .curve-gallery{ fill:none; stroke:var(--energy); stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
+  .area-fill{ fill:var(--accent); fill-opacity:0.18; stroke:var(--accent); stroke-opacity:0.55; stroke-width:1.2; }
+  .area-fill-alt{ fill:var(--energy); fill-opacity:0.18; stroke:var(--energy); stroke-opacity:0.55; stroke-width:1.2; }
+  .guide{ stroke:var(--text-muted); stroke-width:1; stroke-dasharray:3 3; opacity:0.55; }
+  .chart-label{ font-size:11px; font-weight:500; }
+  .ab-label{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; font-weight:600; }
+
+  .stats{ display:grid; grid-template-columns:1.3fr 1fr; gap:10px; margin-top:16px; }
+  @media (max-width:480px){ .stats{ grid-template-columns:1fr; } }
+  .stat{ background:var(--panel-alt); border:1px solid var(--panel-border); border-left:3px solid var(--accent); border-radius:8px; padding:12px 14px; }
+  .stat-label{ display:block; font-size:0.72rem; color:var(--text-muted); margin-bottom:6px; }
+  .stat-value{ font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:1.05rem; color:var(--text); }
+  .stat-main .stat-value{ font-size:1.5rem; color:var(--accent); }
+  .stat-value span{ font-size:0.8rem; color:var(--text-muted); font-weight:500; margin-left:4px; }
+
+  .formula{
+    margin-top:14px; font-size:0.92rem; color:var(--text);
+    background:var(--panel-alt); border:1px solid var(--panel-border); border-radius:6px; padding:12px 14px;
+    overflow-x:auto;
+  }
+  .katex{ font-size:1.02em; }
+
+  .control{ margin-bottom:20px; }
+  .control:last-child{ margin-bottom:0; }
+  .control-top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; font-size:0.88rem; }
+  .control-top .val{ font-family:'IBM Plex Mono', monospace; color:var(--accent); font-weight:600; }
+  input[type=range]{ -webkit-appearance:none; appearance:none; width:100%; height:5px; border-radius:3px; outline:none; background:var(--panel-border); }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none; width:17px; height:17px; border-radius:50%;
+    background:var(--accent); cursor:pointer; border:3px solid #ffffff; box-shadow:0 0 0 1.5px var(--accent), 0 2px 6px rgba(23,34,49,0.3);
+  }
+  input[type=range]::-moz-range-thumb{ width:17px; height:17px; border-radius:50%; background:var(--accent); cursor:pointer; border:3px solid #ffffff; box-shadow:0 0 0 1.5px var(--accent); }
+  .range-ticks{ display:flex; justify-content:space-between; margin-top:5px; font-size:0.68rem; color:var(--text-muted); opacity:0.8; }
+
+  select#curveType{
+    width:100%; padding:10px 12px; font-family:'IBM Plex Sans', sans-serif; font-size:0.92rem;
+    color:var(--text); background:var(--panel-alt); border:1px solid var(--panel-border); border-radius:8px;
+    margin-bottom:14px; cursor:pointer;
+  }
+
+  .note{ font-size:0.8rem; color:var(--text-muted); margin-top:18px; }
+  .model-grid{ display:grid; grid-template-columns:1fr; gap:22px; }
+  .model p{ color:var(--text-muted); font-size:0.93rem; margin:0 0 11px; }
+  .model p:last-child{ margin-bottom:0; }
+  .model strong{ color:var(--text); font-weight:500; }
+  .research{ background:var(--panel-alt); border:1px solid var(--panel-border); border-radius:8px; padding:12px 14px; font-size:0.85rem; color:var(--text-muted); margin-top:14px; }
+  .research strong{ color:var(--text); }
+
+  .exam-link{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:14px; }
+  @media (max-width:700px){ .exam-link{ grid-template-columns:1fr; } }
+  .exam-col{ background:var(--panel-alt); border:1px solid var(--panel-border); border-radius:8px; padding:12px 14px; font-size:0.85rem; color:var(--text-muted); }
+
+  html{ scroll-behavior:smooth; }
+  section, .panel, .layout{ scroll-margin-top:76px; }
+  .topnav{
+    position:sticky; top:0; z-index:50; background:rgba(255,255,255,0.88);
+    backdrop-filter:saturate(1.4) blur(10px); -webkit-backdrop-filter:saturate(1.4) blur(10px);
+    border-bottom:1px solid var(--panel-border);
+  }
+  .topnav-inner{ max-width:1120px; margin:0 auto; padding:10px 20px; display:flex; align-items:center; gap:22px; }
+  .brand{ display:flex; align-items:center; gap:9px; font-family:'Archivo', sans-serif; font-weight:700; font-size:0.95rem; white-space:nowrap; color:var(--text); text-decoration:none; }
+  .brand-mark{ width:26px; height:26px; border-radius:7px; background:linear-gradient(135deg, var(--accent), var(--energy)); display:flex; align-items:center; justify-content:center; }
+  .brand-mark svg{ width:15px; height:15px; }
+  .navlinks{ display:flex; gap:4px; overflow-x:auto; scrollbar-width:none; margin-left:auto; }
+  .navlinks::-webkit-scrollbar{ display:none; }
+  .navlinks a{ font-size:0.82rem; color:var(--text-muted); text-decoration:none; padding:6px 11px; border-radius:7px; white-space:nowrap; transition:background .15s, color .15s; }
+  .navlinks a:hover{ background:var(--panel-alt); color:var(--accent); }
+  body{ padding:0 !important; }
+  .page{ padding:30px 20px 64px; }
+
+  .kpis{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
+  @media (max-width:860px){ .kpis{ grid-template-columns:repeat(2,1fr); } }
+  .kpi{ background:var(--panel); border:1px solid var(--panel-border); border-radius:14px; padding:16px 18px; box-shadow:var(--shadow); }
+  .kpi .big{ font-family:'Archivo', sans-serif; font-weight:800; font-size:1.7rem; letter-spacing:-0.02em; color:var(--accent); line-height:1.1; }
+  .kpi:nth-child(even) .big{ color:var(--energy); }
+  .kpi .lbl{ font-size:0.8rem; color:var(--text-muted); margin-top:6px; line-height:1.4; }
+  .kpi .src{ font-size:0.68rem; color:var(--text-muted); opacity:0.75; margin-top:6px; }
+
+  .num{ font-family:'IBM Plex Mono', monospace; font-size:0.72rem; font-weight:600; color:#fff; background:var(--accent); border-radius:6px; padding:2px 7px; letter-spacing:0.02em; }
+  .num.alt{ background:var(--energy); }
+
+  .findings{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:14px; }
+  @media (max-width:860px){ .findings{ grid-template-columns:1fr; } }
+  .finding{ background:var(--panel-alt); border:1px solid var(--panel-border); border-radius:10px; padding:14px 16px; font-size:0.86rem; color:var(--text-muted); }
+  .finding strong{ display:block; color:var(--text); font-family:'Archivo', sans-serif; font-size:0.9rem; margin-bottom:6px; }
+  .dyn{ background:linear-gradient(135deg, #eaf1fc, #e8f6f0); border:1px solid var(--panel-border); border-left:3px solid var(--accent); border-radius:10px; padding:14px 16px; font-size:0.95rem; color:var(--text); }
+  .dyn strong{ color:var(--accent); }
+
+  .thumbs{ display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:14px; }
+  @media (max-width:860px){ .thumbs{ grid-template-columns:repeat(2,1fr); } }
+  .thumb{ background:var(--panel-alt); border:1px solid var(--panel-border); border-radius:9px; padding:8px 8px 7px; cursor:pointer; color:var(--text-muted); font-family:'IBM Plex Sans',sans-serif; font-size:0.72rem; text-align:left; transition:all .15s; }
+  .thumb svg{ height:34px; margin-bottom:5px; }
+  .thumb span{ display:block; line-height:1.25; }
+  .thumb:hover{ border-color:var(--energy); color:var(--text); }
+  .thumb.on{ background:#e6f6f0; border-color:var(--energy); color:var(--energy); font-weight:600; box-shadow:0 0 0 1px var(--energy) inset; }
+  select#curveType{ display:none; }
+  .gallery-grid{ display:grid; grid-template-columns:1.3fr 1fr; gap:22px; align-items:start; }
+  @media (max-width:860px){ .gallery-grid{ grid-template-columns:1fr; } }
+  .gallery-side .gallery-desc{ font-size:0.88rem; color:var(--text-muted); margin:14px 0; line-height:1.6; }
+  .presets{ margin-top:20px; padding-top:16px; border-top:1px solid var(--panel-border); }
+  .presets-label{ display:block; font-family:'Archivo',sans-serif; font-weight:600; font-size:0.82rem; margin-bottom:10px; }
+  .preset-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .preset{ background:var(--panel-alt); border:1px solid var(--panel-border); border-radius:9px; padding:9px 8px; cursor:pointer; font-family:'IBM Plex Sans',sans-serif; font-size:0.82rem; font-weight:600; color:var(--text); transition:all .15s; text-align:center; }
+  .preset small{ display:block; font-weight:400; font-size:0.66rem; color:var(--text-muted); margin-top:3px; line-height:1.25; }
+  .preset:hover{ border-color:var(--accent); background:#e8f0fc; }
+  .refs{ margin:0; padding-left:22px; font-size:0.86rem; color:var(--text-muted); }
+  .refs li{ margin-bottom:8px; }
+  .refs em{ color:var(--text); }
+
+  .footer{ margin-top:26px; padding:22px 24px; border-radius:14px; background:#172231; color:#c9d4e2; display:flex; flex-wrap:wrap; gap:14px 30px; align-items:center; justify-content:space-between; font-size:0.84rem; }
+  .footer strong{ color:#fff; font-family:'Archivo', sans-serif; }
+  .footer .small{ font-size:0.76rem; color:#8ea0b6; }
+  .exam-col strong{ color:var(--text); display:block; margin-bottom:8px; font-family:'Archivo', sans-serif; font-size:0.85rem; }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a class="brand" href="#top">
+      <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg></span>
+      EV Bogotá · Cálculo Integral
+    </a>
+    <div class="navlinks">
+      <a href="#objetivo">Objetivo</a>
+      <a href="#simulador">Simulador</a>
+      <a href="#galeria">Galería</a>
+      <a href="#modelo">Modelo</a>
+      <a href="#examen">Examen</a>
+      <a href="#conclusiones">Conclusiones</a>
+      <a href="#referencias">Referencias</a>
+    </div>
+  </div>
+</nav>
+<div class="page" id="top">
+<div class="wrap">
+
+  <div class="hero">
+    <div class="hero-text">
+      <h1>Crecimiento de vehículos eléctricos registrados en Bogotá</h1>
+      <div class="accent-bar"></div>
+      <p>Las matrículas de vehículos eléctricos en Colombia no crecen de forma constante — crecen de forma acelerada cada año. El simulador calcula, mediante el área bajo la curva, cuántos vehículos eléctricos nuevos se registrarán en Bogotá durante un intervalo de años, información clave para planear a tiempo la red pública de carga.</p>
+    </div>
+    <div class="hero-art">
+      <svg class="hero-fallback" viewBox="0 0 260 190" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect width="260" height="190" fill="#e4edfa"/>
+        <rect y="150" width="260" height="40" fill="#cfdcee"/>
+        <g transform="translate(36,92)">
+          <rect y="20" width="100" height="32" rx="9" fill="#2563c4"/>
+          <path d="M10 20 L26 3 L76 3 L92 20Z" fill="#2563c4"/>
+          <rect x="30" y="8" width="42" height="13" rx="2" fill="#bcd4f3"/>
+          <circle cx="24" cy="54" r="11" fill="#172231"/><circle cx="24" cy="54" r="4" fill="#cfd8e3"/>
+          <circle cx="78" cy="54" r="11" fill="#172231"/><circle cx="78" cy="54" r="4" fill="#cfd8e3"/>
+        </g>
+        <g transform="translate(160,66)">
+          <rect width="16" height="66" rx="3" fill="#8aa0ba"/>
+          <rect x="-6" y="-10" width="28" height="15" rx="3" fill="#1fa97e"/>
+          <path d="M5 22 L12 22 L8 33 L14 33 L3 48 L7 35 L1 35Z" fill="#fff"/>
+        </g>
+      </svg>
+      <img src="https://images.unsplash.com/photo-1779268579895-688c9402625f?auto=format&amp;fit=crop&amp;w=1200&amp;q=70" alt="Vehículo eléctrico moderno conectado a una estación de carga" loading="lazy" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="big">19.724</div><div class="lbl">vehículos eléctricos matriculados en Colombia durante 2025</div><div class="src">Fenalco · ANDI · RUNT</div></div>
+    <div class="kpi"><div class="big">+115%</div><div class="lbl">crecimiento frente a 2024: la adopción se acelera, no es lineal</div><div class="src">Fenalco · ANDI · RUNT</div></div>
+    <div class="kpi"><div class="big">50×</div><div class="lbl">más matrículas que en 2018, cuando fueron apenas 390 unidades</div><div class="src">Fenalco · ANDI · RUNT</div></div>
+    <div class="kpi"><div class="big">80 → 482</div><div class="lbl">puntos de carga en Bogotá: los actuales frente a los que se necesitarán en 2030</div><div class="src">UPME · Concejo de Bogotá</div></div>
+  </div>
+
+  <div class="panel objectives" id="objetivo">
+    <h2><span class="num">01</span>Objetivo del ejercicio</h2>
+    <p class="obj-general"><strong>Objetivo general:</strong> determinar, mediante el cálculo del área bajo la curva, cuántos vehículos eléctricos nuevos se habrán registrado en Bogotá durante un intervalo de tiempo [a, b] años, dado que la tasa de nuevas matrículas crece exponencialmente — información clave para dimensionar a tiempo la infraestructura pública de carga.</p>
+    <p class="obj-label">Objetivos específicos:</p>
+    <ol class="obj-list">
+      <li>Modelar la tasa de nuevas matrículas de vehículos eléctricos como una función exponencial creciente dV/dt = V₀·e^(rt), donde V₀ es la tasa inicial de matrícula y r la tasa de crecimiento anual.</li>
+      <li>Calcular, mediante el área bajo la curva en el intervalo [a, b], el número total de vehículos eléctricos nuevos registrados en ese periodo.</li>
+      <li>Permitir variar los parámetros del sistema (tasa inicial de matrícula, tasa de crecimiento anual, y los límites del intervalo a y b) para explorar distintos escenarios de adopción.</li>
+      <li>Comparar esta función contra otras familias de curvas de crecimiento y decrecimiento, para entender por qué el modelo exponencial es el que mejor describe este fenómeno.</li>
+    </ol>
+  </div>
+
+  <div class="layout" id="simulador">
+
+    <div class="panel">
+      <h2><span class="num">02</span>Simulador — tasa de nuevas matrículas dV/dt</h2>
+      <svg id="chart" viewBox="0 0 600 320" preserveAspectRatio="xMidYMid meet"></svg>
+      <p class="note" style="margin-top:12px;">La curva sube cada año más rápido que el anterior — esa aceleración es la firma de un crecimiento exponencial, no lineal. La zona sombreada entre a y b es el área bajo la curva: el total de vehículos nuevos en ese periodo.</p>
+
+      <div class="stats" style="grid-template-columns:1.1fr 1fr 1fr;">
+        <div class="stat stat-main">
+          <span class="stat-label">Vehículos eléctricos nuevos entre a y b</span>
+          <span class="stat-value" id="accumOut">0<span>vehículos</span></span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Promedio mensual en ese periodo</span>
+          <span class="stat-value" id="monthlyOut">0 /mes</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Electrolineras necesarias*</span>
+          <span class="stat-value" id="stationsOut">0</span>
+        </div>
+      </div>
+      <p class="note" style="margin-top:8px;">*Según el estándar de 15 vehículos eléctricos por punto de carga pública que exige el Concejo de Bogotá para garantizar disponibilidad razonable (Proyecto de Acuerdo 474 de 2026).</p>
+      <div class="formula" id="formulaOut"></div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="dot"></span>Parámetros del sistema</h2>
+
+      <div class="control">
+        <div class="control-top"><span>Tasa inicial de matrícula — V₀</span><span class="val" id="V0Val"></span></div>
+        <input type="range" id="V0" min="200" max="5000" step="50" value="1500">
+        <div class="range-ticks"><span>200 veh/año</span><span>5000 veh/año</span></div>
+      </div>
+
+      <div class="control">
+        <div class="control-top"><span>Tasa de crecimiento anual — r</span><span class="val" id="rVal"></span></div>
+        <input type="range" id="r" min="0.05" max="0.90" step="0.05" value="0.45">
+        <div class="range-ticks"><span>5% /año</span><span>90% /año</span></div>
+      </div>
+
+      <div class="control">
+        <div class="control-top"><span>Inicio del intervalo — a</span><span class="val" id="aVal"></span></div>
+        <input type="range" id="a" min="0" max="7.5" step="0.1" value="0">
+        <div class="range-ticks"><span>0 años</span><span>7.5 años</span></div>
+      </div>
+
+      <div class="control">
+        <div class="control-top"><span>Fin del intervalo — b</span><span class="val" id="bVal"></span></div>
+        <input type="range" id="b" min="0.5" max="8" step="0.1" value="4">
+        <div class="range-ticks"><span>0.5 años</span><span>8 años</span></div>
+      </div>
+
+      <p class="note">r refleja qué tan rápido crece la adopción (incentivos, infraestructura de carga, precio de baterías). a y b se mantienen siempre dentro de [0, 8] años, con a &lt; b. Estos mismos a y b se usan en la galería de curvas de abajo.</p>
+      <div class="presets">
+        <span class="presets-label">Escenarios rápidos</span>
+        <div class="preset-row">
+          <button type="button" class="preset" data-v0="1000" data-r="0.2">Conservador<small>r = 20%</small></button>
+          <button type="button" class="preset" data-v0="1500" data-r="0.45">Base<small>r = 45%</small></button>
+          <button type="button" class="preset" data-v0="2500" data-r="0.75">Acelerado<small>cercano al +115% de 2025</small></button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="panel" id="galeria">
+    <h2><span class="num alt">03</span>¿La curva solo toma esta forma? — Galería de 10 curvas de crecimiento</h2>
+    <p class="note" style="margin-top:0;">No. El exponencial es solo una de muchas familias de funciones. Cada una de las diez opciones de abajo corresponde a un fenómeno real de movilidad eléctrica, ingeniería o economía — no son formas inventadas al azar. Elige una y compara, en el mismo intervalo [a, b] que definiste arriba, cómo cambia el resultado de la integral según la forma de la curva.</p>
+    <div class="thumbs" id="thumbs"></div>
+    <select id="curveType" aria-label="Elegir curva"></select>
+    <div class="gallery-grid">
+      <div><svg id="galleryChart" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid meet"></svg></div>
+      <div class="gallery-side">
+        <div class="formula" id="galleryFormula" style="margin-top:0;"></div>
+        <p class="gallery-desc" id="galleryDesc"></p>
+        <div class="stat stat-main">
+          <span class="stat-label">Área bajo esta curva entre a y b</span>
+          <span class="stat-value" id="galleryAreaOut">0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel model" id="modelo">
+    <h2><span class="num">04</span>Planteamiento y modelo matemático</h2>
+    <div class="model-grid">
+      <div>
+        <p><strong>Problema:</strong> según el informe de Fenalco y la ANDI con datos del RUNT, las matrículas de vehículos eléctricos en Colombia crecieron 115% en 2025 frente a 2024, y Bogotá concentra cerca de la mitad de esas matrículas. Esta adopción no es lineal: crece de forma acelerada año tras año. Para que la ciudad pueda dimensionar a tiempo su red de electrolineras, hace falta poder estimar cuántos vehículos eléctricos nuevos se registrarán en un periodo futuro bajo un escenario de crecimiento dado.</p>
+        <p><strong>Modelo:</strong> la tasa de nuevas matrículas se modela como \( \dfrac{dV}{dt} = V_0\,e^{rt} \), donde \(t\) son los años desde el punto de referencia, \(V_0\) es la tasa de matrícula en \(t=0\), y \(r\) es la tasa de crecimiento anual.</p>
+        <p><strong>Área bajo la curva:</strong> el total de vehículos eléctricos nuevos matriculados entre los años \(a\) y \(b\) es el área bajo esa curva: \( V(a,b) = \displaystyle\int_a^b V_0\,e^{rt}\,dt \). Para resolverla hago la sustitución \(u = rt\), de donde \(du = r\,dt\), así que \(dt = \dfrac{du}{r}\). La integral se convierte en \( \displaystyle\int V_0 e^{u}\frac{du}{r} = \frac{V_0}{r}\displaystyle\int e^{u}\,du = \frac{V_0}{r}e^{u}+C = \frac{V_0}{r}e^{rt}+C \). Evaluando entre \(a\) y \(b\): <strong>\( V(a,b) = \dfrac{V_0}{r}\left[e^{rb} - e^{ra}\right] \)</strong>. Es el mismo tipo de integral de crecimiento exponencial simple que se evalúa en el examen de cálculo integral, aplicado aquí a un problema real de movilidad sostenible.</p>
+        <div class="research">
+          <strong>Datos de respaldo (Fenalco / ANDI, RUNT, dic. 2025):</strong> en Colombia se matricularon 19.724 vehículos eléctricos en 2025, un crecimiento del 115% frente a 2024; en 2018 fueron apenas 390 — más de 50 veces menos. Esa tasa de crecimiento compuesta real ronda entre 65% y 115% anual en los últimos años, el mismo tipo de crecimiento exponencial puro que modela \(V_0 e^{rt}\) en este simulador.
+        </div>
+        <img class="research-photo" src="https://images.unsplash.com/photo-1751553822264-47ef77e3495f?auto=format&amp;fit=crop&amp;w=1200&amp;q=70" alt="Estación de carga de vehículos eléctricos iluminada de noche" onerror="this.style.display='none'">
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="examen">
+    <h2><span class="num alt">05</span>De dónde salió la idea: el mismo problema del examen</h2>
+    <p class="note" style="margin-top:0;">La pregunta 2 del segundo parcial decía: <em>"el número de libros en una biblioteca aumenta a una tasa según la función \(dB/dt = 200e^{0.03t}\); ¿cuántos libros tendrá acumulados 4 años después de su apertura?"</em>. Es exactamente la misma estructura matemática que este simulador — una cantidad que se acumula a partir de una tasa de crecimiento exponencial — solo que aplicada a vehículos eléctricos en vez de libros, para que sí cumpla con el requisito de sostenibilidad/ingeniería de la rúbrica.</p>
+    <div class="exam-link">
+      <div class="exam-col">
+        <strong>Examen — biblioteca</strong>
+        Tasa: \(dB/dt = 200\,e^{0.03t}\) (libros/año)<br>
+        Acumulado en [0,4]: \(\displaystyle\int_0^4 200e^{0.03t}\,dt\)<br>
+        Resultado: ≈ 850 libros — opción D (la correcta; A = 7400 estaba mal)
+      </div>
+      <div class="exam-col">
+        <strong>Este simulador — vehículos eléctricos</strong>
+        Tasa: \(dV/dt = V_0\,e^{rt}\) (vehículos/año)<br>
+        Acumulado en [a,b]: \(\displaystyle\int_a^b V_0 e^{rt}\,dt\)<br>
+        Resultado: se recalcula en vivo con tus parámetros arriba
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="conclusiones">
+    <h2><span class="num">06</span>Conclusiones</h2>
+    <div class="dyn" id="dynConclusion"></div>
+    <div class="findings">
+      <div class="finding"><strong>El área pesa más al final</strong>Como la tasa crece cada año, una ventana de la misma duración acumula muchísimos más vehículos cuanto más tarde ocurre. Planear la red de carga con el promedio histórico subestimaría la demanda futura.</div>
+      <div class="finding"><strong>El modelo tiene un rango de validez</strong>El crecimiento exponencial sin techo describe la fase temprana de adopción (innovadores y primeros adoptantes, cerca del 16% del mercado según Rogers). Después la curva se frena y pasa a una logística, como la curva 7 de la galería.</div>
+      <div class="finding"><strong>Del cálculo a la ingeniería</strong>La integral no es un número abstracto: dividida entre 15 vehículos por punto de carga, se convierte en la cantidad de electrolineras que la ciudad debe tener lista a tiempo.</div>
+    </div>
+  </div>
+
+  <div class="panel" id="referencias">
+    <h2><span class="num alt">07</span>Referencias y créditos</h2>
+    <ol class="refs">
+      <li>Fenalco y ANDI. <em>Informe de matrículas de vehículos eléctricos e híbridos en Colombia, con datos del RUNT</em>. Diciembre de 2025.</li>
+      <li>UPME. <em>Proyecciones de infraestructura de recarga (EVSE) para vehículos eléctricos</em>: 482 estaciones de carga necesarias en Bogotá para 2030.</li>
+      <li>Concejo de Bogotá. <em>Proyecto de Acuerdo 474 de 2026</em>: mapa distrital de brechas de infraestructura de carga y estándar de 15 vehículos eléctricos por punto de carga pública.</li>
+      <li>Rogers, E. M. (1962). <em>Diffusion of Innovations</em>. Nueva York: Free Press.</li>
+      <li>Stewart, J. <em>Cálculo de una variable. Trascendentes tempranas</em>. Cengage Learning (crecimiento y decaimiento exponencial; integral definida y área bajo la curva).</li>
+      <li>Créditos técnicos: tipografía matemática con KaTeX 0.16.9; fotografías de Unsplash; texto en Archivo e IBM Plex.</li>
+    </ol>
+  </div>
+
+  <div class="footer">
+    <div><strong>Universidad EAN</strong> · Departamento de Ciencias Básicas<br>Cálculo Integral · Simulador interactivo asistido por IA</div>
+    <div class="small">Problema de sostenibilidad e ingeniería resuelto con el cálculo integral:<br>área bajo la curva de una tasa de crecimiento exponencial.</div>
+  </div>
+
+</div>
+</div>
+
+<script>
+(function(){
+  const els = {};
+  ['V0','r','a','b'].forEach(id => els[id]=document.getElementById(id));
+  ['V0Val','rVal','aVal','bVal'].forEach(id => els[id]=document.getElementById(id));
+  els.accumOut = document.getElementById('accumOut');
+  els.monthlyOut = document.getElementById('monthlyOut');
+  els.stationsOut = document.getElementById('stationsOut');
+  els.dynConclusion = document.getElementById('dynConclusion');
+  els.formulaOut = document.getElementById('formulaOut');
+  els.chart = document.getElementById('chart');
+  els.curveType = document.getElementById('curveType');
+  els.galleryChart = document.getElementById('galleryChart');
+  els.galleryFormula = document.getElementById('galleryFormula');
+  els.galleryDesc = document.getElementById('galleryDesc');
+  els.galleryAreaOut = document.getElementById('galleryAreaOut');
+
+  const SUB = {'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉','a':'ₐ'};
+  const SUP = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','b':'ᵇ'};
+  function texToPlain(t){
+    let s = t;
+    s = s.replace(/\\displaystyle|\\left|\\right|\\!/g,'');
+    s = s.replace(/\\[,;: ]/g,' ');
+    s = s.replace(/\\dfrac|\\frac/g,'FRAC');
+    for(let i=0;i<3;i++) s = s.replace(/FRAC\{([^{}]*)\}\{([^{}]*)\}/g,'($1)/($2)');
+    s = s.replace(/\\sqrt\{([^{}]*)\}/g,'√($1)');
+    s = s.replace(/\\int_([A-Za-z0-9])\^([A-Za-z0-9])/g,(m,a,b)=>'∫'+(SUB[a]||'_'+a)+(SUP[b]||'^'+b)+' ');
+    s = s.replace(/\\int/g,'∫');
+    s = s.replace(/\\cdot/g,'·').replace(/\\pi/g,'π').replace(/\\ln/g,'ln').replace(/\\sin/g,'sin').replace(/\\max/g,'max');
+    s = s.replace(/\\text\{([^{}]*)\}/g,'$1');
+    s = s.replace(/\^\{([^{}]*)\}/g,'^($1)').replace(/_\{([^{}]*)\}/g,'_($1)');
+    s = s.replace(/_([0-9])/g,(m,d)=>SUB[d]);
+    s = s.replace(/\\[A-Za-z]+/g,'').replace(/[{}]/g,'');
+    return s.replace(/\s+/g,' ').trim();
+  }
+  function renderTex(el, tex){
+    try{ katex.render(tex, el, {throwOnError:false, displayMode:false}); }
+    catch(e){ el.textContent = texToPlain(tex); }
+  }
+  function plainStaticMath(root){
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const nodes = []; while(walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(n => { if(n.nodeValue.indexOf('\\(') > -1){ n.nodeValue = n.nodeValue.replace(/\\\((.+?)\\\)/g,(m,x)=>texToPlain(x)); } });
+  }
+
+  function styleRange(el){
+    const min = parseFloat(el.min), max = parseFloat(el.max), val = parseFloat(el.value);
+    const pct = ((val - min) / (max - min)) * 100;
+    el.style.background = 'linear-gradient(to right, var(--accent) ' + pct.toFixed(1) + '%, var(--panel-border) ' + pct.toFixed(1) + '%)';
+  }
+
+  function clampAB(){
+    let a = parseFloat(els.a.value);
+    let b = parseFloat(els.b.value);
+    if(a >= b){
+      b = Math.min(8, a + 0.5);
+      els.b.value = b;
+    }
+  }
+
+  function Vrate(t, V0, r){ return V0 * Math.exp(r * t); }
+  function accumIntegral(a, b, V0, r){ return (V0/r) * (Math.exp(r*b) - Math.exp(r*a)); }
+
+  function numericIntegral(f, a, b, n){
+    n = n || 2000;
+    const h = (b-a)/n;
+    let s = 0.5*(f(a)+f(b));
+    for(let i=1;i<n;i++){ s += f(a+i*h); }
+    return s*h;
+  }
+
+  // --- galería de 10 curvas ---
+  const curves = [
+    { id:'lin_up', name:'1. Lineal creciente — instalación de electrolineras en Bogotá', tex:'f(t) = 25\\,t', f: t=>25*t,
+      desc:'Bogotá tiene hoy cerca de 80 puntos de carga (65 semipúblicos de Enel X + 15 públicos del Distrito), y la UPME proyecta que la ciudad necesitará 482 para 2030. Si el ritmo de instalación aumenta de forma constante cada año conforme entran más operadores privados (Evinka, CIEN, Enel X), la tasa de nuevas estaciones por año crece linealmente.' },
+    { id:'lin_down', name:'2. Lineal decreciente — salida de vehículos a combustión', tex:'f(t) = \\max(16000 - 2000t,\\ 0)', f: t=>Math.max(16000-2000*t,0),
+      desc:'Varios fabricantes han fijado metas de electrificación total de su oferta hacia 2030-2035. Si una marca reduce su producción de motores de combustión a ritmo constante hasta llegar a cero en una fecha meta, la tasa de vehículos a gasolina que entran al mercado decrece linealmente.' },
+    { id:'quad', name:'3. Cuadrática — pérdidas de energía en la red (ley de Joule)', tex:'f(t) = 150\\,t^2', f: t=>150*t*t,
+      desc:'La potencia disipada como calor en un conductor crece con el CUADRADO de la corriente (P=I²R, ley de Joule — física establecida). Si el número de vehículos cargando a la vez crece aproximadamente con los años de adopción, las pérdidas de la red de Bogotá no crecen proporcionalmente sino de forma cuadrática — una de las razones técnicas detrás del Proyecto de Acuerdo 474 de 2026 del Concejo de Bogotá, que exige mapear la capacidad real de la red antes de instalar más electrolineras.' },
+    { id:'cubic', name:'4. Cúbica — potencia para vencer la resistencia del aire', tex:'f(t) = 25\\,t^3', f: t=>25*t*t*t,
+      desc:'La potencia necesaria para vencer la resistencia aerodinámica crece con el CUBO de la velocidad (la fuerza de arrastre ∝ v², y potencia = fuerza × velocidad ∝ v³) — por eso la autonomía de un eléctrico cae tanto en autopista. Aquí el eje t funciona como un proxy de velocidad creciente, no de años calendario, para mostrar la misma ley física dentro del mismo formato de gráfica.' },
+    { id:'exp_up', name:'5. Exponencial creciente (el modelo principal)', tex:'f(t) = 1500\\,e^{0.45t}', f: t=>1500*Math.exp(0.45*t),
+      desc:'Crece sin límite y cada vez más rápido — es el modelo usado arriba para las matrículas de vehículos eléctricos, respaldado por datos reales de RUNT/Fenalco/ANDI (crecimiento de 115% en 2025).' },
+    { id:'exp_down', name:'6. Exponencial decreciente — degradación de la batería', tex:'f(t) = 12000\\,e^{-0.5t}', f: t=>12000*Math.exp(-0.5*t),
+      desc:'La capacidad útil restante de una batería de ion-litio decae aproximadamente de forma exponencial con los ciclos de carga — un comportamiento bien documentado en ingeniería de baterías, y la razón por la que los fabricantes dan garantías típicas de 8 años para el paquete de baterías de un vehículo eléctrico.' },
+    { id:'logistic', name:'7. Logística — adopción de talleres y concesionarios EV', tex:'f(t) = 6000\\,(1-e^{-0.5t})', f: t=>6000*(1-Math.exp(-0.5*t)),
+      desc:'El modelo de difusión de innovaciones de Everett Rogers (1962) describe cómo una tecnología nueva se adopta rápido al inicio y luego se satura al acercarse a cubrir todo el mercado — aplicado aquí a la proporción de talleres y concesionarios en Bogotá que ya ofrecen servicio técnico para vehículos eléctricos.' },
+    { id:'log', name:'8. Logarítmica — rendimientos decrecientes de infraestructura concentrada', tex:'f(t) = 3000\\,\\ln(t+1)', f: t=>3000*Math.log(t+1),
+      desc:'Principio económico de utilidad marginal decreciente: el beneficio ambiental adicional (CO₂ evitado) de poner una electrolinera más en una zona ya bien cubierta crece cada vez menos — el argumento detrás del "Mapa Distrital de Brechas de Infraestructura de Carga" que propone el Concejo de Bogotá para priorizar zonas desatendidas en vez de concentrar estaciones.' },
+    { id:'sqrt', name:'9. Raíz cuadrada — cobertura geográfica de la red de carga', tex:'f(t) = 2500\\,\\sqrt{t}', f: t=>2500*Math.sqrt(t),
+      desc:'Si las electrolineras se distribuyen de forma uniforme en el área urbana, el radio promedio de cobertura por estación crece con la raíz cuadrada del número de estaciones instaladas (relación geométrica área-radio: A=πr² ⇒ r∝√N) — un principio real de planeación de redes de infraestructura urbana.' },
+    { id:'sine', name:'10. Senoidal — curva de carga diaria de la red eléctrica', tex:'f(t) = 4000 + 3000\\sin\\!\\left(\\dfrac{2\\pi t}{4}\\right)', f: t=>4000+3000*Math.sin(2*Math.PI*t/4),
+      desc:'La demanda eléctrica para cargar vehículos no es constante: sube y baja en ciclos, con un pico típico en la noche cuando los usuarios llegan a casa a cargar y un valle en la madrugada — la "curva de carga" (load curve) que los ingenieros de sistemas de potencia usan para dimensionar la capacidad de una red eléctrica.' }
+  ];
+
+  curves.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id; opt.textContent = c.name;
+    els.curveType.appendChild(opt);
+  });
+  els.curveType.value = 'exp_up';
+
+  const thumbsEl = document.getElementById('thumbs');
+  curves.forEach(c => {
+    const N = 40; const vals = []; let mx = 0;
+    for(let i=0;i<=N;i++){ const v = c.f(i/N*8); vals.push(v); mx = Math.max(mx, v); }
+    const d = vals.map((v,i) => (i?'L':'M') + (i/N*100).toFixed(1) + ' ' + (34 - (v/(mx||1))*30).toFixed(1)).join(' ');
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'thumb'; btn.dataset.id = c.id;
+    const label = c.name.split(' — ')[0].replace(/^\d+\.\s*/,'').replace(/\s*\(.*\)/,'');
+    btn.innerHTML = '<svg viewBox="0 0 100 38" preserveAspectRatio="none"><path d="' + d + '" fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/></svg><span>' + label + '</span>';
+    btn.addEventListener('click', () => { els.curveType.value = c.id; drawGallery(parseFloat(els.a.value), parseFloat(els.b.value)); });
+    thumbsEl.appendChild(btn);
+  });
+
+  function drawGenericChart(svgEl, f, horizon, a, b, curveClass, areaClass){
+    const W=600, H=300, padL=58, padR=16, padT=18, padB=34;
+    const plotW = W-padL-padR, plotH = H-padT-padB;
+
+    let maxVal = 0;
+    const N_PTS = 140;
+    for(let i=0;i<=N_PTS;i++){
+      const t = (i/N_PTS)*horizon;
+      maxVal = Math.max(maxVal, f(t));
+    }
+    const yMaxVal = Math.max(maxVal*1.15, 1);
+    const xToPx = t => padL + (t/horizon)*plotW;
+    const yToPx = v => padT + plotH - (v/yMaxVal)*plotH;
+
+    let pts = [];
+    for(let i=0;i<=N_PTS;i++){
+      const t = (i/N_PTS)*horizon;
+      pts.push([xToPx(t), yToPx(f(t))]);
+    }
+    const curveD = 'M ' + pts.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L ');
+
+    let areaPts = [];
+    const Na=70;
+    for(let i=0;i<=Na;i++){
+      const t = a + (i/Na)*(b-a);
+      areaPts.push([xToPx(t), yToPx(f(t))]);
+    }
+    const areaD = 'M '+xToPx(a).toFixed(1)+' '+yToPx(0).toFixed(1)+
+      ' L '+areaPts.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L ')+
+      ' L '+xToPx(b).toFixed(1)+' '+yToPx(0).toFixed(1)+' Z';
+
+    let grid='';
+    for(let i=0;i<=4;i++){
+      const y = padT+(i/4)*plotH;
+      grid += '<line class="grid" x1="'+padL+'" y1="'+y.toFixed(1)+'" x2="'+(W-padR)+'" y2="'+y.toFixed(1)+'"/>';
+      const val = yMaxVal*(1-i/4);
+      grid += '<text class="axis-label" x="'+(padL-8)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end">'+Math.round(val).toLocaleString('es-CO')+'</text>';
+    }
+    for(let i=0;i<=horizon;i++){
+      const x = xToPx(i);
+      grid += '<line class="grid" x1="'+x.toFixed(1)+'" y1="'+padT+'" x2="'+x.toFixed(1)+'" y2="'+(H-padB)+'"/>';
+      grid += '<text class="axis-label" x="'+x.toFixed(1)+'" y="'+(H-padB+16)+'" text-anchor="middle">'+i+'a</text>';
+    }
+
+    const xa = xToPx(a), xb = xToPx(b);
+    let guides = '';
+    guides += '<line class="guide" x1="'+xa.toFixed(1)+'" y1="'+padT+'" x2="'+xa.toFixed(1)+'" y2="'+(H-padB)+'"/>';
+    guides += '<line class="guide" x1="'+xb.toFixed(1)+'" y1="'+padT+'" x2="'+xb.toFixed(1)+'" y2="'+(H-padB)+'"/>';
+    guides += '<rect x="'+(xa-9).toFixed(1)+'" y="'+(padT-2)+'" width="18" height="14" rx="3" fill="#ffffff" stroke="var(--panel-border)"/>';
+    guides += '<text class="ab-label" x="'+xa.toFixed(1)+'" y="'+(padT+9)+'" text-anchor="middle" fill="var(--text-muted)">a</text>';
+    guides += '<rect x="'+(xb-9).toFixed(1)+'" y="'+(padT-2)+'" width="18" height="14" rx="3" fill="#ffffff" stroke="var(--panel-border)"/>';
+    guides += '<text class="ab-label" x="'+xb.toFixed(1)+'" y="'+(padT+9)+'" text-anchor="middle" fill="var(--text-muted)">b</text>';
+
+    svgEl.innerHTML = grid + guides +
+      '<path class="'+areaClass+'" d="'+areaD+'"/>' +
+      '<path class="'+curveClass+'" d="'+curveD+'"/>';
+  }
+
+  function drawGallery(a, b){
+    const sel = curves.find(c => c.id === els.curveType.value) || curves[4];
+    document.querySelectorAll('.thumb').forEach(t => t.classList.toggle('on', t.dataset.id === sel.id));
+    drawGenericChart(els.galleryChart, sel.f, 8, a, b, 'curve-gallery', 'area-fill-alt');
+    renderTex(els.galleryFormula, sel.tex);
+    els.galleryDesc.textContent = sel.desc;
+    const area = numericIntegral(sel.f, a, b);
+    els.galleryAreaOut.textContent = Math.round(area).toLocaleString('es-CO');
+  }
+
+  function draw(){
+    clampAB();
+    ['V0','r','a','b'].forEach(id => styleRange(els[id]));
+
+    const V0 = parseFloat(els.V0.value);
+    const r = parseFloat(els.r.value);
+    const a = parseFloat(els.a.value);
+    const b = parseFloat(els.b.value);
+
+    els.V0Val.textContent = V0 + ' veh/año';
+    els.rVal.textContent = (r*100).toFixed(0) + ' %/año';
+    els.aVal.textContent = a.toFixed(1) + ' a';
+    els.bVal.textContent = b.toFixed(1) + ' a';
+
+    const accum = accumIntegral(a, b, V0, r);
+    const months = (b - a) * 12;
+    const monthly = months > 0 ? accum/months : 0;
+
+    els.accumOut.innerHTML = Math.round(accum).toLocaleString('es-CO') + '<span>vehículos</span>';
+    els.monthlyOut.textContent = Math.round(monthly).toLocaleString('es-CO') + ' /mes';
+    els.stationsOut.textContent = Math.ceil(accum/15).toLocaleString('es-CO');
+    const dbl = Math.LN2 / r;
+    els.dynConclusion.innerHTML = 'Con los parámetros actuales (<strong>V₀ = ' + V0.toLocaleString('es-CO') + ' veh/año</strong> y <strong>r = ' + (r*100).toFixed(0) + '% anual</strong>), entre el año ' + a.toFixed(1) + ' y el año ' + b.toFixed(1) + ' se registrarían <strong>' + Math.round(accum).toLocaleString('es-CO') + ' vehículos eléctricos nuevos</strong>, lo que exige al menos <strong>' + Math.ceil(accum/15).toLocaleString('es-CO') + ' puntos de carga pública</strong>. A este ritmo, la tasa de matrícula se duplica cada <strong>' + dbl.toFixed(1) + ' años</strong> (ln 2 / r).';
+
+    const tex = 'V(' + a.toFixed(1) + ',' + b.toFixed(1) + ') = \\dfrac{' + V0.toFixed(0) + '}{' + r.toFixed(2) + '}\\left[e^{' + r.toFixed(2) + '\\cdot ' + b.toFixed(1) + '} - e^{' + r.toFixed(2) + '\\cdot ' + a.toFixed(1) + '}\\right] = ' + Math.round(accum).toLocaleString('es-CO') + '\\ \\text{vehículos}';
+    renderTex(els.formulaOut, tex);
+
+    drawGenericChart(els.chart, t=>Vrate(t,V0,r), 8, a, b, 'curve-main', 'area-fill');
+    drawGallery(a, b);
+  }
+
+  ['V0','r','a','b'].forEach(id => els[id].addEventListener('input', draw));
+  els.curveType.addEventListener('change', () => {
+    const a = parseFloat(els.a.value), b = parseFloat(els.b.value);
+    drawGallery(a, b);
+  });
+
+  draw();
+
+  ['.model','#examen'].forEach(sel => {
+    const root = document.querySelector(sel);
+    if(!root) return;
+    if(window.renderMathInElement && window.katex){
+      renderMathInElement(root, {delimiters:[{left:'\\(',right:'\\)',display:false}], throwOnError:false});
+    } else {
+      plainStaticMath(root);
+    }
+  });
+
+  document.querySelectorAll('.preset').forEach(btn => btn.addEventListener('click', () => {
+    els.V0.value = btn.dataset.v0; els.r.value = btn.dataset.r; draw();
+  }));
+})();
+</script>
+
+</body>
+</html>
